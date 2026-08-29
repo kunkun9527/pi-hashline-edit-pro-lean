@@ -1,0 +1,14 @@
+node_modules/
+*.bak
+*.backup
+.npm/
+.pi/
+agents/
+.env
+.env.*
+!.env.example
+*.log
+coverage/
+dist/
+.DS_Store
+Thumbs.db

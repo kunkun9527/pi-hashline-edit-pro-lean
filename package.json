@@ -1,0 +1,51 @@
+{
+  "name": "pi-hashline-edit-pro-lean",
+  "version": "2.5.2-lean.1",
+  "private": true,
+  "type": "module",
+  "description": "Token-lean Hashline read, replace, and undo tools with the full editing safety model preserved.",
+  "license": "MIT",
+  "author": "kunkun9527",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kunkun9527/pi-hashline-edit-pro-lean.git"
+  },
+  "homepage": "https://github.com/kunkun9527/pi-hashline-edit-pro-lean#readme",
+  "bugs": {
+    "url": "https://github.com/kunkun9527/pi-hashline-edit-pro-lean/issues"
+  },
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "hashline",
+    "file-editing",
+    "token-efficient"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "check": "npm run typecheck && npm test"
+  },
+  "dependencies": {
+    "pi-hashline-edit-pro": "2.5.2"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": ">=0.84.1 <1.0.0",
+    "@earendil-works/pi-tui": ">=0.84.1 <1.0.0"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "0.84.3",
+    "@earendil-works/pi-tui": "0.84.3",
+    "@types/node": "24.0.0",
+    "jiti": "2.7.0",
+    "typescript": "5.9.3"
+  },
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
