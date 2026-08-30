@@ -19,25 +19,6 @@ import { loadFileKindAndText } from "pi-hashline-edit-pro/src/file-kind";
 import { toCwd } from "pi-hashline-edit-pro/src/paths";
 import { resolveTarget } from "pi-hashline-edit-pro/src/fs-write";
 import { valAccess } from "pi-hashline-edit-pro/src/validation";
-const COLLAPSED_DISPLAY_SERVICE = Symbol.for(
-  "@local/pi-collapsed-tools.display-service.v1",
-);
-
-type CollapsedDisplayTool = { name: string };
-type CollapsedDisplayService = {
-  readonly version: 1;
-  decorate<T extends CollapsedDisplayTool>(tool: T): T;
-};
-
-function decorateWithCollapsedDisplay<T extends CollapsedDisplayTool>(tool: T): T {
-  const services = globalThis as unknown as Record<PropertyKey, unknown>;
-  const candidate = services[COLLAPSED_DISPLAY_SERVICE];
-  if (!candidate || typeof candidate !== "object") return tool;
-  const service = candidate as Partial<CollapsedDisplayService>;
-  return service.version === 1 && typeof service.decorate === "function"
-    ? service.decorate(tool)
-    : tool;
-}
 
 // ---- trimmed tool text (keeps core usage rules, drops verbosity) ----
 
@@ -102,9 +83,7 @@ function leanPi(pi: ExtensionAPI): ExtensionAPI {
   return new Proxy(pi, {
     get(target, prop, receiver) {
       if (prop === "registerTool") {
-        return (tool: AnyTool) => target.registerTool(
-          decorateWithCollapsedDisplay(trimTool(tool)) as never,
-        );
+        return (tool: AnyTool) => target.registerTool(trimTool(tool) as never);
       }
       const value = Reflect.get(target, prop, receiver);
       return typeof value === "function" ? value.bind(target) : value;
