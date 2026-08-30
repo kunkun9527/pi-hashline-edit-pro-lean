@@ -35,6 +35,19 @@ undo_last_replace
 
 Always copy the three-character HASH anchors returned by `read`. Never invent anchors, and re-read a file after it changes before making another replacement.
 
+## Measured initialization footprint
+
+With only this extension enabled, its recurring model-facing initialization contribution is:
+
+| Tool | Lean | Upstream `pi-hashline-edit-pro@2.5.2` |
+| --- | ---: | ---: |
+| `read` | 85 | 247 |
+| `replace` | 203 | 948 |
+| `undo_last_replace` | 63 | 215 |
+| **Total** | **351** | **1,410** |
+
+That is **1,059 fewer tokens (75.1%)** than the pinned upstream extension. The measurement used Pi 0.84.4 and `pi-context-view@0.4.3` in a fresh isolated session, with Pi's built-in editing tools disabled and skills, context files, messages, and unrelated extensions excluded. Context View estimates text as `ceil(characters / 4)`, so these are reproducible context-footprint estimates rather than exact GPT tokenizer counts. Runtime-only UI and slash commands are not included because they are not sent to the model.
+
 ## Versions
 
 The upstream runtime is pinned to `pi-hashline-edit-pro@2.5.2`.
