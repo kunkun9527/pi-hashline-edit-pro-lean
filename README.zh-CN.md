@@ -35,6 +35,19 @@ undo_last_replace
 
 必须复制 `read` 返回的三字符 HASH 锚点，绝不要猜测锚点；文件发生变化后，下一次替换前要重新读取。
 
+## 实测初始化上下文占用
+
+仅启用本扩展时，它持续贡献给模型的初始化上下文为：
+
+| 工具 | Lean | 上游 `pi-hashline-edit-pro@2.5.2` |
+| --- | ---: | ---: |
+| `read` | 85 | 247 |
+| `replace` | 203 | 948 |
+| `undo_last_replace` | 63 | 215 |
+| **合计** | **351** | **1,410** |
+
+相比固定版本的上游扩展，减少 **1,059 tokens（75.1%）**。测量使用 Pi 0.84.4 和 `pi-context-view@0.4.3`，在全新隔离会话中关闭 Pi 内置编辑工具，并排除 skills、context files、消息及无关扩展。Context View 按 `ceil(字符数 / 4)` 估算，因此这些是可复现的上下文占用估值，不是 GPT tokenizer 的精确计数。未计入不会发送给模型的纯运行时 UI 和 slash commands。
+
 ## 版本
 
 上游运行时固定为 `pi-hashline-edit-pro@2.5.2`。
