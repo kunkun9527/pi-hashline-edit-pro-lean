@@ -1,41 +1,21 @@
 # pi-hashline-edit-pro-lean
 
-[中文](#中文) · [English](#english)
+[简体中文](README.zh-CN.md)
 
-## 中文
+A token-lean Pi wrapper around [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro). It preserves Hashline's editing safety model while shortening persistent provider-facing descriptions.
 
-`pi-hashline-edit-pro-lean` 是 [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro) 的轻量 Pi 包装层。它保留 Hashline 的读取、替换、撤销、hash store、自动读取和 session hooks，只缩短模型可见的工具描述与提示文本。
+## What it keeps
 
-### 模型可见工具
+- HASH-anchored file reads and line-safe replacements.
+- Undo for the latest replacement.
+- Hash store, served-anchor validation, automatic reads, file checks, and session hooks.
+- The upstream editing runtime rather than a reduced reimplementation.
 
-- `read`
-- `replace`
-- `undo_last_replace`
+## Why it is lean
 
-### 安装
+The wrapper exposes concise descriptions and critical editing rules for three tools instead of the upstream's longer provider-facing text. Parameter names retain their original schema; repetitive field prose and unused prompt resources are omitted.
 
-```bash
-pi install git:github.com/kunkun9527/pi-hashline-edit-pro-lean
-```
-
-不要和原版 Hashline wrapper 同时加载，以免重复注册编辑工具。
-
-### 开发
-
-```bash
-npm ci
-npm run check
-```
-
-上游依赖固定为 `pi-hashline-edit-pro@2.5.2`。请遵循 `read` 返回的 HASH 锚点规则；不要猜测锚点。
-
-## English
-
-`pi-hashline-edit-pro-lean` is a small Pi wrapper around [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro). It preserves Hashline read, replace, undo, hash-store, auto-read, and session-hook behavior while shortening model-facing tool descriptions and prompt text.
-
-It exposes `read`, `replace`, and `undo_last_replace`.
-
-Install:
+## Install
 
 ```bash
 pi install git:github.com/kunkun9527/pi-hashline-edit-pro-lean
@@ -43,8 +23,29 @@ pi install git:github.com/kunkun9527/pi-hashline-edit-pro-lean
 
 Do not load another Hashline wrapper at the same time, or the editing tools may be registered twice.
 
-Validate locally with `npm ci && npm run check`. Always use HASH anchors returned by `read`; never invent them.
+## Use
 
-## License
+Model-facing tools:
 
-MIT. This project is a wrapper around the MIT-licensed `pi-hashline-edit-pro` project.
+```text
+read
+replace
+undo_last_replace
+```
+
+Always copy the three-character HASH anchors returned by `read`. Never invent anchors, and re-read a file after it changes before making another replacement.
+
+## Versions
+
+The upstream runtime is pinned to `pi-hashline-edit-pro@2.5.2`.
+
+## Development
+
+```bash
+npm ci
+npm run check
+```
+
+## License and upstream
+
+MIT. This project wraps the MIT-licensed [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro).
