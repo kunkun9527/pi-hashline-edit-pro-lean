@@ -17,7 +17,7 @@
 pi install git:github.com/kunkun9527/pi-hashline-edit-pro-lean
 ```
 
-请勿与其它 Hashline 包装插件同时加载，以防重复注册编辑工具。
+请勿与其它 Hashline 包装扩展同时加载，以防重复注册编辑工具。
 
 ## 使用方法
 
@@ -33,7 +33,7 @@ undo_last_replace
 
 ## 初始化上下文占用对比
 
-单独启用本插件时，注入到模型初始上下文中的 Token 占用实测如下：
+单独启用本扩展时，注入到模型初始上下文中的 Token 占用实测如下：
 
 | 工具 | Lean 精简版 | 原版 `pi-hashline-edit-pro@2.5.2` |
 | --- | ---: | ---: |
