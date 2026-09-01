@@ -2,18 +2,14 @@
 
 [English](README.md)
 
-[`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro) 的 token 精简版 Pi 包装层。它保留 Hashline 的编辑安全模型，同时缩短长期存在于供应商请求中的描述文本。
+基于 [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro) 的精简封装。在完整保留 Hashline 行锚点安全编辑机制的同时，大幅精简工具描述，降低每次请求中的 Token 消耗。
 
-## 保留的能力
+## 核心特性
 
-- 使用 HASH 锚点读取文件和进行行级安全替换。
-- 撤销最近一次替换。
-- Hash store、已提供锚点验证、自动读取、文件检查和 session hooks。
-- 使用上游编辑运行时，而不是缩减后重新实现。
-
-## 为什么更精简
-
-包装层为三个工具提供精简描述和关键编辑规则，替代上游更长的模型可见文本。参数名称保留原始 schema；重复字段说明和未使用的提示资源被省略。
+* 安全行锚点编辑：基于 3 字符 HASH 锚点读取文件并执行高精度的行级安全替换。
+* 快速撤销：支持一键回滚最近一次替换修改。
+* 完整保留上游逻辑：包含 Hash 缓存、已提供锚点校验、自动重新读取、文件变更检测以及会话生命周期 Hooks。
+* 精简 Prompt 开销：参数字段与原始 Schema 保持一致，去除了冗余啰嗦的说明文本与未使用的 Prompt 资源。
 
 ## 安装
 
@@ -21,11 +17,11 @@
 pi install git:github.com/kunkun9527/pi-hashline-edit-pro-lean
 ```
 
-不要同时加载另一个 Hashline 包装层，否则编辑工具可能被重复注册。
+请勿与其它 Hashline 包装插件同时加载，以防重复注册编辑工具。
 
-## 使用
+## 使用方法
 
-模型可见工具：
+模型可见工具包括：
 
 ```text
 read
@@ -33,32 +29,34 @@ replace
 undo_last_replace
 ```
 
-必须复制 `read` 返回的三字符 HASH 锚点，绝不要猜测锚点；文件发生变化后，下一次替换前要重新读取。
+请务必使用 `read` 返回的精确 3 字符 HASH 锚点，切勿主观猜测锚点；文件若有更新，在执行下一次替换前应重新读取。
 
-## 实测初始化上下文占用
+## 初始化上下文占用对比
 
-仅启用本扩展时，它持续贡献给模型的初始化上下文为：
+单独启用本插件时，注入到模型初始上下文中的 Token 占用实测如下：
 
-| 工具 | Lean | 上游 `pi-hashline-edit-pro@2.5.2` |
+| 工具 | Lean 精简版 | 原版 `pi-hashline-edit-pro@2.5.2` |
 | --- | ---: | ---: |
 | `read` | 85 | 247 |
 | `replace` | 203 | 948 |
 | `undo_last_replace` | 63 | 215 |
 | **合计** | **351** | **1,410** |
 
-相比固定版本的上游扩展，减少 **1,059 tokens（75.1%）**。测量使用 Pi 0.84.4 和 `pi-context-view@0.4.3`，在全新隔离会话中关闭 Pi 内置编辑工具，并排除 skills、context files、消息及无关扩展。Context View 按 `ceil(字符数 / 4)` 估算，因此这些是可复现的上下文占用估值，不是 GPT tokenizer 的精确计数。未计入不会发送给模型的纯运行时 UI 和 slash commands。
+相比固定版本的上游扩展，初始开销减少了 **1,059 tokens（75.1%）**。
 
-## 版本
+测试环境为 Pi 0.84.4 与 `pi-context-view@0.4.3` 独立会话，关闭了 Pi 内置编辑工具，并排除了 Skills、上下文文件与无关扩展。Context View 按 `ceil(字符数 / 4)` 估算。未计入不会发送给模型的纯运行时 UI 与 Slash 命令。
 
-上游运行时固定为 `pi-hashline-edit-pro@2.5.2`。
+## 版本说明
 
-## 开发
+上游运行时锁定为 `pi-hashline-edit-pro@2.5.2`。
+
+## 本地开发
 
 ```bash
 npm ci
 npm run check
 ```
 
-## 许可证与上游
+## 开源协议与致谢
 
-MIT。本项目包装了采用 MIT 许可证的 [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro)。
+MIT 协议。本项目封装自采用 MIT 协议的 [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro)。
