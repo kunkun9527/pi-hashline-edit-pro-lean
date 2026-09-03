@@ -50,13 +50,32 @@ This release follows upstream `3.0.1`, whose editing contract is intentionally i
 
 Legacy aliases are not emulated because doing so would bypass or weaken the current upstream contract. Start a fresh Pi session after upgrading so the model receives the new schemas and instructions.
 
+## Context footprint
+
+The recurring provider-facing tool contribution was measured against the pinned upstream `3.0.1` runtime:
+
+| Active configuration | Lean | Upstream | Saved |
+| --- | ---: | ---: | ---: |
+| Default: `read`, `replace`, `insert`, `undo_last_change` | **485 tokens** | 1,358 tokens | **873 (64.3%)** |
+| With optional `anchor_grep` enabled | **617 tokens** | 1,846 tokens | **1,229 (66.6%)** |
+
+Per-tool estimates:
+
+| Tool | Lean | Upstream | Saved |
+| --- | ---: | ---: | ---: |
+| `read` | 84 | 276 | 192 (69.6%) |
+| `replace` | 163 | 534 | 371 (69.5%) |
+| `insert` | 159 | 345 | 186 (53.9%) |
+| `undo_last_change` | 79 | 203 | 124 (61.1%) |
+| `anchor_grep` | 132 | 488 | 356 (73.0%) |
+
+Method: two identical runs in isolated fresh sessions using Pi `0.84.4` and `pi-context-view` `0.5.0`. The session lifecycle was bound before measuring, so default-disabled `anchor_grep` is excluded from the default total. Estimates use Context View's `ceil(characters / 4)` calculation over active tool descriptions, JSON schemas, prompt snippets, and guidelines. Pi's base prompt, built-in tools, skills, context files, messages, unrelated extensions, runtime-only UI, and slash commands are excluded.
+
 ## Versions
 
 - Lean wrapper: `3.0.1-lean.1`
 - Upstream runtime: `pi-hashline-edit-pro@3.0.1`
 - Node.js: `>=22.19.0`
-
-The older `2.5.2` token table is intentionally not reused because the upstream tool set and schemas changed. The lean wrapper still removes the same recurring categories of provider-facing prose, but current measurements should be compared only against upstream `3.0.1`.
 
 ## Development
 
