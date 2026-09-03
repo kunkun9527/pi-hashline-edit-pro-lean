@@ -2,66 +2,61 @@
 
 [简体中文](README.zh-CN.md)
 
-A lightweight Pi wrapper for [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro). It maintains Hashline's line-anchor safety model while stripping verbose descriptions from the prompt.
+A token-lean Pi wrapper around [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro). It pins the complete upstream `3.0.1` runtime while shortening persistent provider-facing tool text.
 
-## Core Features
+## What it keeps
 
-* Safe anchored editing: Reads files with HASH line anchors and performs precise line-safe replacements.
-* Instant rollback: Supports one-step undo for the most recent edit.
-* Complete runtime integrity: Preserves hash caching, anchor validation, automatic re-reads, file checks, and session hooks.
-* Lean prompt footprint: Retains original parameter schemas while removing unnecessary prompt verbiage and unused resources.
+- Four-character Hashline anchors and served-anchor validation.
+- Safe `replace` and `insert` operations, plus per-file undo.
+- Opt-in anchored ripgrep results.
+- Hash store, automatic reads, file checks, write-echo protection, and upstream session hooks.
+- The upstream runtime and schemas rather than a reduced reimplementation.
+- Optional compatibility with the local `@local/pi-collapsed-tools.display-service.v1` decorator.
 
-## Installation
+## Why it is lean
+
+Only model-facing prose is trimmed: concise descriptions and critical usage rules replace upstream prompt text, parameter descriptions are removed, and no prompt resources are added. Runtime behavior, validation, error contracts, and tool schemas remain upstream-compatible.
+
+## Install
 
 ```bash
 pi install git:github.com/kunkun9527/pi-hashline-edit-pro-lean
 ```
 
-Do not load this alongside another Hashline wrapper to avoid registering duplicate editing tools.
+Do not load another Hashline wrapper at the same time, or tools may be registered twice.
 
-## Usage
-
-The model interacts with three tools:
+## Tools
 
 ```text
 read
 replace
-undo_last_replace
+insert
+undo_last_change
+anchor_grep        # registered but disabled by default
 ```
 
-Always use the three-character HASH anchors returned by `read`. Never guess anchors, and re-read the file if it has changed before performing subsequent replacements.
+Use `/toggle-anchor-grep` to switch between Pi's built-in `grep` and `anchor_grep`. Use `/toggle-auto-read` to control automatic anchors after writes and post-edit diffs.
 
-## Context Footprint Benchmark
+Always copy the four-character anchors returned by `read` or `anchor_grep`. Never invent anchors. `replace` now accepts `replacement_lines: string[]`; `[]` deletes the selected range and `[""]` creates one blank line.
 
-With only this extension enabled, its recurring initialization overhead in the model context is:
+## Breaking changes from the previous lean release
 
-| Tool | Lean | Upstream `pi-hashline-edit-pro@2.5.2` |
-| --- | ---: | ---: |
-| `read` | 85 | 247 |
-| `replace` | 203 | 948 |
-| `undo_last_replace` | 63 | 215 |
-| **Total** | **351** | **1,410** |
+This release follows upstream `3.0.1`, whose editing contract is intentionally incompatible with `2.5.2`:
 
-This saves **1,059 tokens (75.1%)** compared to the pinned upstream package.
+- Anchors changed from three to four characters.
+- `replacement_text` became `replacement_lines`.
+- `undo_last_replace` became `undo_last_change`.
+- `insert` and optional `anchor_grep` were added.
 
-The benchmark was measured on Pi 0.84.4 with `pi-context-view@0.4.3` in a fresh isolated session, with built-in editing tools disabled and skills, context files, and unrelated extensions excluded. Context View estimates tokens as `ceil(characters / 4)`. Pure runtime UI elements and slash commands are excluded as they are not sent to the model.
-
-## Measured initialization footprint
-
-With only this extension enabled, its recurring model-facing initialization contribution is:
-
-| Tool | Lean | Upstream `pi-hashline-edit-pro@2.5.2` |
-| --- | ---: | ---: |
-| `read` | 85 | 247 |
-| `replace` | 203 | 948 |
-| `undo_last_replace` | 63 | 215 |
-| **Total** | **351** | **1,410** |
-
-That is **1,059 fewer tokens (75.1%)** than the pinned upstream extension. The measurement used Pi 0.84.4 and `pi-context-view@0.4.3` in a fresh isolated session, with Pi's built-in editing tools disabled and skills, context files, messages, and unrelated extensions excluded. Context View estimates text as `ceil(characters / 4)`, so these are reproducible context-footprint estimates rather than exact GPT tokenizer counts. Runtime-only UI and slash commands are not included because they are not sent to the model.
+Legacy aliases are not emulated because doing so would bypass or weaken the current upstream contract. Start a fresh Pi session after upgrading so the model receives the new schemas and instructions.
 
 ## Versions
 
-Upstream runtime is pinned to `pi-hashline-edit-pro@2.5.2`.
+- Lean wrapper: `3.0.1-lean.1`
+- Upstream runtime: `pi-hashline-edit-pro@3.0.1`
+- Node.js: `>=22.19.0`
+
+The older `2.5.2` token table is intentionally not reused because the upstream tool set and schemas changed. The lean wrapper still removes the same recurring categories of provider-facing prose, but current measurements should be compared only against upstream `3.0.1`.
 
 ## Development
 
@@ -70,6 +65,6 @@ npm ci
 npm run check
 ```
 
-## License
+## License and upstream
 
 MIT. This project wraps the MIT-licensed [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro).
