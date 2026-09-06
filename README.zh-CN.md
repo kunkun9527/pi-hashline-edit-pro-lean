@@ -56,15 +56,15 @@ anchor_grep        # 已注册，但默认关闭
 
 | 启用配置 | Lean | 上游 | 节省 |
 | --- | ---: | ---: | ---: |
-| 默认：`read`、`replace`、`insert`、`undo_last_change` | **505 tokens** | 1,358 tokens | **853（62.8%）** |
-| 启用可选的 `anchor_grep` | **637 tokens** | 1,846 tokens | **1,209（65.5%）** |
+| 默认：`read`、`replace`、`insert`、`undo_last_change` | **521 tokens** | 1,358 tokens | **837（61.7%）** |
+| 启用可选的 `anchor_grep` | **653 tokens** | 1,846 tokens | **1,193（64.6%）** |
 
 各工具估算：
 
 | 工具 | Lean | 上游 | 节省 |
 | --- | ---: | ---: | ---: |
-| `read` | 85 | 276 | 191（69.2%） |
-| `replace` | 182 | 534 | 352（65.9%） |
+| `read` | 88 | 276 | 188（68.1%） |
+| `replace` | 195 | 534 | 339（63.5%） |
 | `insert` | 159 | 345 | 186（53.9%） |
 | `undo_last_change` | 79 | 203 | 124（61.1%） |
 | `anchor_grep` | 132 | 488 | 356（73.0%） |
@@ -73,7 +73,7 @@ anchor_grep        # 已注册，但默认关闭
 
 ## 版本
 
-- Lean 包装层：`3.0.1-lean.3`
+- Lean 包装层：`3.0.1-lean.4`
 - 上游运行时：`pi-hashline-edit-pro@3.0.1`
 - Node.js：`>=22.19.0`
 
