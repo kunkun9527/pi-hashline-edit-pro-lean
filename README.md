@@ -56,15 +56,15 @@ The recurring provider-facing tool contribution was measured against the pinned 
 
 | Active configuration | Lean | Upstream | Saved |
 | --- | ---: | ---: | ---: |
-| Default: `read`, `replace`, `insert`, `undo_last_change` | **485 tokens** | 1,358 tokens | **873 (64.3%)** |
-| With optional `anchor_grep` enabled | **617 tokens** | 1,846 tokens | **1,229 (66.6%)** |
+| Default: `read`, `replace`, `insert`, `undo_last_change` | **505 tokens** | 1,358 tokens | **853 (62.8%)** |
+| With optional `anchor_grep` enabled | **637 tokens** | 1,846 tokens | **1,209 (65.5%)** |
 
 Per-tool estimates:
 
 | Tool | Lean | Upstream | Saved |
 | --- | ---: | ---: | ---: |
-| `read` | 84 | 276 | 192 (69.6%) |
-| `replace` | 163 | 534 | 371 (69.5%) |
+| `read` | 85 | 276 | 191 (69.2%) |
+| `replace` | 182 | 534 | 352 (65.9%) |
 | `insert` | 159 | 345 | 186 (53.9%) |
 | `undo_last_change` | 79 | 203 | 124 (61.1%) |
 | `anchor_grep` | 132 | 488 | 356 (73.0%) |
@@ -73,7 +73,7 @@ Method: two identical runs in isolated fresh sessions using Pi `0.84.4` and `pi-
 
 ## Versions
 
-- Lean wrapper: `3.0.1-lean.2`
+- Lean wrapper: `3.0.1-lean.3`
 - Upstream runtime: `pi-hashline-edit-pro@3.0.1`
 - Node.js: `>=22.19.0`
 
