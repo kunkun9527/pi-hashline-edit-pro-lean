@@ -50,7 +50,7 @@ function decorateWithCollapsedDisplay<T extends CollapsedDisplayTool>(tool: T): 
 }
 
 const DESC: Record<string, string> = {
-  read: "Read a file with 4-char HASH anchors for safe edits; supports paging and images.",
+  read: "Read a file with 4-char HASH anchors; supports paging and images. Check path first.",
   replace: "Replace an inclusive anchored line range with bare replacement lines.",
   insert: "Insert bare lines before or after an anchored line.",
   undo_last_change: "Undo the most recent replace or insert for a file.",
@@ -59,7 +59,7 @@ const DESC: Record<string, string> = {
 
 const GUIDE: Record<string, string> = {
   read: "Copy anchors from the left column; never invent them. Re-read after external file changes.",
-  replace: "- remove_from/remove_to are bare 4-char anchors; the range is inclusive.\n- replacement_lines is one string per line: [] deletes; [\"\"] inserts one blank line; do not embed newlines.\n- Keep ranges tight. Apply one edit, inspect its diff, then continue with fresh anchors from that diff or re-read.",
+  replace: "- remove_from/remove_to are bare 4-char anchors; the range is inclusive.\n- replacement_lines is raw file content only: one string per line; never include an anchor/hash prefix such as `Hasu│`; [] deletes; [\"\"] inserts one blank line; do not embed newlines.\n- Keep ranges tight. Apply one edit, inspect its diff, then continue with fresh anchors from that diff or re-read.",
   insert: "- Use a bare 4-char anchor and direction before/after; the anchor line remains.\n- lines is one string per inserted line; do not embed newlines. For an empty file, insert after its sole empty-line anchor.\n- Apply one edit and inspect its diff before continuing.",
   undo_last_change: "Only the latest replace or insert for a file can be undone; write clears history. Undo immediately after a bad diff. If undo is stale, re-read instead of forcing it.",
   anchor_grep: "Returned anchors can be used directly by replace or insert. Narrow path/glob/context and prefer literal search when regex is unnecessary.",

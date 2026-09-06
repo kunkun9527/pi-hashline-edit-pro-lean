@@ -73,7 +73,7 @@ Method: two identical runs in isolated fresh sessions using Pi `0.84.4` and `pi-
 
 ## Versions
 
-- Lean wrapper: `3.0.1-lean.1`
+- Lean wrapper: `3.0.1-lean.2`
 - Upstream runtime: `pi-hashline-edit-pro@3.0.1`
 - Node.js: `>=22.19.0`
 

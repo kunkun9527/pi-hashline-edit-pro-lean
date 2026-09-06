@@ -73,7 +73,7 @@ anchor_grep        # 已注册，但默认关闭
 
 ## 版本
 
-- Lean 包装层：`3.0.1-lean.1`
+- Lean 包装层：`3.0.1-lean.2`
 - 上游运行时：`pi-hashline-edit-pro@3.0.1`
 - Node.js：`>=22.19.0`
 
