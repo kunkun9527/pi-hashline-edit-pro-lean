@@ -1,6 +1,6 @@
 {
   "name": "pi-hashline-edit-pro-lean",
-  "version": "3.0.1-lean.4",
+  "version": "3.0.1-lean.5",
   "type": "module",
   "description": "Token-lean Hashline read, replace, insert, grep, and undo tools with the full upstream safety model preserved.",
   "license": "MIT",

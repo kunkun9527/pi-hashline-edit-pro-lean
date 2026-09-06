@@ -51,16 +51,16 @@ function decorateWithCollapsedDisplay<T extends CollapsedDisplayTool>(tool: T): 
 
 const DESC: Record<string, string> = {
   read: "Read a file with 4-char HASH anchors; supports paging and images. Verify the path exists first.",
-  replace: "Replace an inclusive anchored line range with bare file lines; use fresh 4-char anchors.",
-  insert: "Insert bare lines before or after an anchored line.",
+  replace: "Edit an inclusive range with bare 4-char anchors.",
+  insert: "Insert raw lines before or after a bare 4-char anchor.",
   undo_last_change: "Undo the most recent replace or insert for a file.",
   anchor_grep: "Search text with ripgrep and return 4-char anchors for direct editing.",
 };
 
 const GUIDE: Record<string, string> = {
   read: "Copy anchors from the left column; never invent them. Re-read after external file changes.",
-  replace: "- remove_from/remove_to are bare 4-char anchors; the range is inclusive.\n- replacement_lines is raw file content only: one string per line; never include an anchor/hash prefix such as `Hasu│`; [] deletes; [\"\"] inserts one blank line; do not embed newlines.\n- Keep ranges tight. Apply one edit and inspect its diff. After a failed edit or external file change, re-read before retrying with fresh anchors.",
-  insert: "- Use a bare 4-char anchor and direction before/after; the anchor line remains.\n- lines is one string per inserted line; do not embed newlines. For an empty file, insert after its sole empty-line anchor.\n- Apply one edit and inspect its diff before continuing.",
+  replace: "replacement_lines: one raw line per item; no HASH prefix/newlines; [] deletes, [\"\"] adds a blank line. Keep ranges tight; inspect each edit. After failure or external changes, re-read and retry with fresh anchors.",
+  insert: "lines: one raw line per item; no embedded newlines; the anchor remains. For an empty file, use its sole empty-line anchor. Inspect each edit before continuing.",
   undo_last_change: "Only the latest replace or insert for a file can be undone; write clears history. Undo immediately after a bad diff. If undo is stale, re-read instead of forcing it.",
   anchor_grep: "Returned anchors can be used directly by replace or insert. Narrow path/glob/context and prefer literal search when regex is unnecessary.",
 };
