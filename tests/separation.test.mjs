@@ -47,7 +47,7 @@ function assertNoDescriptions(value) {
   for (const child of Object.values(value)) assertNoDescriptions(child);
 }
 
-test("registers the upstream 3.0.1 tools with lean model-facing text", () => {
+test("registers the upstream 3.0.4 tools with lean model-facing text", () => {
   const registered = [];
   const pi = createPi(registered);
   const originalRegisterTool = pi.registerTool;

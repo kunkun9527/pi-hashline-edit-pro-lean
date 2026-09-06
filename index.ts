@@ -51,18 +51,18 @@ function decorateWithCollapsedDisplay<T extends CollapsedDisplayTool>(tool: T): 
 
 const DESC: Record<string, string> = {
   read: "Read a file with 4-char HASH anchors; supports paging and images. Verify the path exists first.",
-  replace: "Edit an inclusive range with bare 4-char anchors.",
-  insert: "Insert raw lines before or after a bare 4-char anchor.",
+  replace: "Replace an inclusive range using bare 4-char HASH anchors.",
+  insert: "Insert raw lines around a bare 4-char HASH anchor; provide the path.",
   undo_last_change: "Undo the most recent replace or insert for a file.",
   anchor_grep: "Search text with ripgrep and return 4-char anchors for direct editing.",
 };
 
 const GUIDE: Record<string, string> = {
-  read: "Copy anchors from the left column; never invent them. Re-read after external file changes.",
-  replace: "replacement_lines: one raw line per item; no HASH prefix/newlines; [] deletes, [\"\"] adds a blank line. Keep ranges tight; inspect each edit. After failure or external changes, re-read and retry with fresh anchors.",
-  insert: "lines: one raw line per item; no embedded newlines; the anchor remains. For an empty file, use its sole empty-line anchor. Inspect each edit before continuing.",
-  undo_last_change: "Only the latest replace or insert for a file can be undone; write clears history. Undo immediately after a bad diff. If undo is stale, re-read instead of forcing it.",
-  anchor_grep: "Returned anchors can be used directly by replace or insert. Narrow path/glob/context and prefer literal search when regex is unnecessary.",
+  read: "Use exact anchors from read output; verify the path first and re-read after changes.",
+  replace: "Use bare anchors from read output; replacement_lines is raw lines only, one string per item; no HASH prefixes/newlines; [] deletes, [\"\"] is a blank line. Re-read after failure.",
+  insert: "Provide path explicitly; anchor is a bare 4-char hash; lines are raw lines, one string per item, with no HASH prefixes/newlines; the anchor remains. Re-read after failure.",
+  undo_last_change: "Only the latest replace or insert can be undone; write clears history. Undo immediately after a bad diff; re-read if stale.",
+  anchor_grep: "Use returned anchors directly; narrow the search path/glob/context.",
 };
 
 const PARAMS = new Set(Object.keys(DESC));

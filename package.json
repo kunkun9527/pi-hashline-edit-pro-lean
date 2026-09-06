@@ -1,6 +1,6 @@
 {
   "name": "pi-hashline-edit-pro-lean",
-  "version": "3.0.1-lean.5",
+  "version": "3.0.4-lean.1",
   "type": "module",
   "description": "Token-lean Hashline read, replace, insert, grep, and undo tools with the full upstream safety model preserved.",
   "license": "MIT",
@@ -29,7 +29,7 @@
     "check": "npm run typecheck && npm test"
   },
   "dependencies": {
-    "pi-hashline-edit-pro": "3.0.1"
+    "pi-hashline-edit-pro": "3.0.4"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": ">=0.84.1 <1.0.0",

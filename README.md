@@ -2,7 +2,7 @@
 
 [简体中文](README.zh-CN.md)
 
-A token-lean Pi wrapper around [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro). It pins the complete upstream `3.0.1` runtime while shortening persistent provider-facing tool text.
+A token-lean Pi wrapper around [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro). It pins the complete upstream `3.0.4` runtime while shortening persistent provider-facing tool text.
 
 ## What it keeps
 
@@ -41,7 +41,7 @@ Always copy the four-character anchors returned by `read` or `anchor_grep`. Neve
 
 ## Breaking changes from the previous lean release
 
-This release follows upstream `3.0.1`, whose editing contract is intentionally incompatible with `2.5.2`:
+This release follows upstream `3.0.4`, whose editing contract is intentionally incompatible with `2.5.2`:
 
 - Anchors changed from three to four characters.
 - `replacement_text` became `replacement_lines`.
@@ -52,29 +52,28 @@ Legacy aliases are not emulated because doing so would bypass or weaken the curr
 
 ## Context footprint
 
-The recurring provider-facing tool contribution was measured against the pinned upstream `3.0.1` runtime:
+The recurring provider-facing tool contribution was measured against the upstream `pi-hashline-edit-pro@3.0.4` runtime:
 
 | Active configuration | Lean | Upstream | Saved |
 | --- | ---: | ---: | ---: |
-| Default: `read`, `replace`, `insert`, `undo_last_change` | **437 tokens** | 1,358 tokens | **921 (67.8%)** |
-| With optional `anchor_grep` enabled | **569 tokens** | 1,846 tokens | **1,277 (69.2%)** |
+| Default: `read`, `replace`, `insert`, `undo_last_change` | **423 tokens** | 1,503 tokens | **1,080 (71.9%)** |
+| With optional `anchor_grep` enabled | **538 tokens** | 1,991 tokens | **1,453 (73.0%)** |
 
 Per-tool estimates:
 
 | Tool | Lean | Upstream | Saved |
 | --- | ---: | ---: | ---: |
-| `read` | 88 | 276 | 188 (68.1%) |
-| `replace` | 137 | 534 | 397 (74.3%) |
-| `insert` | 133 | 345 | 212 (61.4%) |
-| `undo_last_change` | 79 | 203 | 124 (61.1%) |
-| `anchor_grep` | 132 | 488 | 356 (73.0%) |
+| `read` | 87 | 276 | 189 (68.5%) |
+| `replace` | 130 | 625 | 495 (79.2%) |
+| `insert` | 138 | 399 | 261 (65.4%) |
+| `undo_last_change` | 68 | 203 | 135 (66.5%) |
+| `anchor_grep` | 115 | 488 | 373 (76.4%) |
 
 Method: two identical runs in isolated fresh sessions using Pi `0.84.4` and `pi-context-view` `0.5.0`. The session lifecycle was bound before measuring, so default-disabled `anchor_grep` is excluded from the default total. Estimates use Context View's `ceil(characters / 4)` calculation over active tool descriptions, JSON schemas, prompt snippets, and guidelines. Pi's base prompt, built-in tools, skills, context files, messages, unrelated extensions, runtime-only UI, and slash commands are excluded.
-
 ## Versions
 
-- Lean wrapper: `3.0.1-lean.5`
-- Upstream runtime: `pi-hashline-edit-pro@3.0.1`
+- Lean wrapper: `3.0.4-lean.1`
+- Upstream runtime: `pi-hashline-edit-pro@3.0.4`
 - Node.js: `>=22.19.0`
 
 ## Development

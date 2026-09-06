@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-[`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro) 的 Token 精简版 Pi 包装层。当前固定使用完整的上游 `3.0.1` 运行时，只精简长期进入模型上下文的工具文本。
+[`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro) 的 Token 精简版 Pi 包装层。当前固定使用完整的上游 `3.0.4` 运行时，只精简长期进入模型上下文的工具文本。
 
 ## 保留的能力
 
@@ -41,7 +41,7 @@ anchor_grep        # 已注册，但默认关闭
 
 ## 相比旧版 lean 的破坏性变化
 
-本版本跟随上游 `3.0.1`，其编辑契约与 `2.5.2` 有意不兼容：
+本版本跟随上游 `3.0.4`，其编辑契约与 `2.5.2` 有意不兼容：
 
 - 锚点由三字符改为四字符。
 - `replacement_text` 改为 `replacement_lines`。
@@ -52,29 +52,29 @@ anchor_grep        # 已注册，但默认关闭
 
 ## 上下文占用
 
-针对固定使用的上游 `3.0.1` 运行时，实测插件长期进入模型上下文的工具定义占用如下：
+针对上游 `pi-hashline-edit-pro@3.0.4` 运行时，实测插件长期进入模型上下文的工具定义占用如下：
 
 | 启用配置 | Lean | 上游 | 节省 |
 | --- | ---: | ---: | ---: |
-| 默认：`read`、`replace`、`insert`、`undo_last_change` | **437 tokens** | 1,358 tokens | **921（67.8%）** |
-| 启用可选的 `anchor_grep` | **569 tokens** | 1,846 tokens | **1,277（69.2%）** |
+| 默认：`read`、`replace`、`insert`、`undo_last_change` | **423 tokens** | 1,503 tokens | **1,080（71.9%）** |
+| 启用可选的 `anchor_grep` | **538 tokens** | 1,991 tokens | **1,453（73.0%）** |
 
 各工具估算：
 
 | 工具 | Lean | 上游 | 节省 |
 | --- | ---: | ---: | ---: |
-| `read` | 88 | 276 | 188（68.1%） |
-| `replace` | 137 | 534 | 397（74.3%） |
-| `insert` | 133 | 345 | 212（61.4%） |
-| `undo_last_change` | 79 | 203 | 124（61.1%） |
-| `anchor_grep` | 132 | 488 | 356（73.0%） |
+| `read` | 87 | 276 | 189（68.5%） |
+| `replace` | 130 | 625 | 495（79.2%） |
+| `insert` | 138 | 399 | 261（65.4%） |
+| `undo_last_change` | 68 | 203 | 135（66.5%） |
+| `anchor_grep` | 115 | 488 | 373（76.4%） |
 
 测量方法：使用 Pi `0.84.4` 和 `pi-context-view` `0.5.0`，在隔离的全新会话中重复测量两次，结果一致。测量前绑定完整 session 生命周期，因此默认总计不会误算默认关闭的 `anchor_grep`。按照 Context View 的 `ceil(字符数 / 4)` 方法，对已激活工具的描述、JSON Schema、Prompt snippets 和 guidelines 估算 Token；不包含 Pi Base Prompt、内置工具、Skills、上下文文件、消息、无关扩展、仅运行时 UI 和斜杠命令。
 
 ## 版本
 
-- Lean 包装层：`3.0.1-lean.5`
-- 上游运行时：`pi-hashline-edit-pro@3.0.1`
+- Lean 包装层：`3.0.4-lean.1`
+- 上游运行时：`pi-hashline-edit-pro@3.0.4`
 - Node.js：`>=22.19.0`
 
 ## 本地开发
