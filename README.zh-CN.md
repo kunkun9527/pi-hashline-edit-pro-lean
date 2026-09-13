@@ -52,24 +52,21 @@ anchor_grep        # 已注册，但默认关闭
 
 ## 上下文占用
 
-针对上游 `pi-hashline-edit-pro@3.0.4` 运行时，实测插件长期进入模型上下文的工具定义占用如下：
+<!-- token-benchmark:benchmark:start -->
+针对上游 `pi-hashline-edit-pro@3.0.4`，实测结果如下：
 
-| 启用配置 | Lean | 上游 | 节省 |
+| 配置 | Lean | 上游 | 节省 |
 | --- | ---: | ---: | ---: |
-| 默认：`read`、`replace`、`insert`、`undo_last_change` | **423 tokens** | 1,503 tokens | **1,080（71.9%）** |
-| 启用可选的 `anchor_grep` | **538 tokens** | 1,991 tokens | **1,453（73.0%）** |
+| 默认 | **423** | 1,503 | **1,080（71.9%）** |
+| 启用 anchor_grep | **538** | 1,991 | **1,453（73.0%）** |
 
-各工具估算：
+- **默认 Lean：**`read` (87) + `replace` (130) + `insert` (138) + `undo_last_change` (68)
+- **默认 上游：**`read` (276) + `replace` (625) + `insert` (399) + `undo_last_change` (203)
+- **启用 anchor_grep Lean：**`read` (87) + `replace` (130) + `insert` (138) + `anchor_grep` (115) + `undo_last_change` (68)
+- **启用 anchor_grep 上游：**`read` (276) + `replace` (625) + `insert` (399) + `anchor_grep` (488) + `undo_last_change` (203)
 
-| 工具 | Lean | 上游 | 节省 |
-| --- | ---: | ---: | ---: |
-| `read` | 87 | 276 | 189（68.5%） |
-| `replace` | 130 | 625 | 495（79.2%） |
-| `insert` | 138 | 399 | 261（65.4%） |
-| `undo_last_change` | 68 | 203 | 135（66.5%） |
-| `anchor_grep` | 115 | 488 | 373（76.4%） |
-
-测量方法：使用 Pi `0.84.4` 和 `pi-context-view` `0.5.0`，在隔离的全新会话中重复测量两次，结果一致。测量前绑定完整 session 生命周期，因此默认总计不会误算默认关闭的 `anchor_grep`。按照 Context View 的 `ceil(字符数 / 4)` 方法，对已激活工具的描述、JSON Schema、Prompt snippets 和 guidelines 估算 Token；不包含 Pi Base Prompt、内置工具、Skills、上下文文件、消息、无关扩展、仅运行时 UI 和斜杠命令。
+测量环境为 Pi 0.85.1 的独立临时进程与空白配置。排除内置工具、Skills、上下文文件、消息、无关扩展、运行时 UI 与 Slash Commands；Token 按 `ceil(字符数 / 4)` 估算。
+<!-- token-benchmark:benchmark:end -->
 
 ## 版本
 

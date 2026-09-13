@@ -52,24 +52,21 @@ Legacy aliases are not emulated because doing so would bypass or weaken the curr
 
 ## Context footprint
 
-The recurring provider-facing tool contribution was measured against the upstream `pi-hashline-edit-pro@3.0.4` runtime:
+<!-- token-benchmark:benchmark:start -->
+Measured against upstream `pi-hashline-edit-pro@3.0.4`:
 
-| Active configuration | Lean | Upstream | Saved |
+| Configuration | Lean | Upstream | Saved |
 | --- | ---: | ---: | ---: |
-| Default: `read`, `replace`, `insert`, `undo_last_change` | **423 tokens** | 1,503 tokens | **1,080 (71.9%)** |
-| With optional `anchor_grep` enabled | **538 tokens** | 1,991 tokens | **1,453 (73.0%)** |
+| Default | **423** | 1,503 | **1,080 (71.9%)** |
+| With anchor_grep | **538** | 1,991 | **1,453 (73.0%)** |
 
-Per-tool estimates:
+- **Default Lean:** `read` (87) + `replace` (130) + `insert` (138) + `undo_last_change` (68)
+- **Default upstream:** `read` (276) + `replace` (625) + `insert` (399) + `undo_last_change` (203)
+- **With anchor_grep Lean:** `read` (87) + `replace` (130) + `insert` (138) + `anchor_grep` (115) + `undo_last_change` (68)
+- **With anchor_grep upstream:** `read` (276) + `replace` (625) + `insert` (399) + `anchor_grep` (488) + `undo_last_change` (203)
 
-| Tool | Lean | Upstream | Saved |
-| --- | ---: | ---: | ---: |
-| `read` | 87 | 276 | 189 (68.5%) |
-| `replace` | 130 | 625 | 495 (79.2%) |
-| `insert` | 138 | 399 | 261 (65.4%) |
-| `undo_last_change` | 68 | 203 | 135 (66.5%) |
-| `anchor_grep` | 115 | 488 | 373 (76.4%) |
-
-Method: two identical runs in isolated fresh sessions using Pi `0.84.4` and `pi-context-view` `0.5.0`. The session lifecycle was bound before measuring, so default-disabled `anchor_grep` is excluded from the default total. Estimates use Context View's `ceil(characters / 4)` calculation over active tool descriptions, JSON schemas, prompt snippets, and guidelines. Pi's base prompt, built-in tools, skills, context files, messages, unrelated extensions, runtime-only UI, and slash commands are excluded.
+Measured with Pi 0.85.1 in separate temporary processes with empty configuration. Built-in tools, skills, context files, messages, unrelated extensions, runtime UI, and slash commands are excluded. Tokens use `ceil(characters / 4)`.
+<!-- token-benchmark:benchmark:end -->
 ## Versions
 
 - Lean wrapper: `3.0.4-lean.1`
