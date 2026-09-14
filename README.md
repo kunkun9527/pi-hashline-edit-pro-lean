@@ -65,7 +65,7 @@ Measured against upstream `pi-hashline-edit-pro@3.0.4`:
 - **With anchor_grep Lean:** `read` (87) + `replace` (130) + `insert` (138) + `anchor_grep` (115) + `undo_last_change` (68)
 - **With anchor_grep upstream:** `read` (276) + `replace` (625) + `insert` (399) + `anchor_grep` (488) + `undo_last_change` (203)
 
-Measured with Pi 0.85.1 in separate temporary processes with empty configuration. Built-in tools, skills, context files, messages, unrelated extensions, runtime UI, and slash commands are excluded. Tokens use `ceil(characters / 4)`.
+Measured with Pi 0.85.1 in separate temporary processes with empty working directories and configuration. Built-in tools, skills, context files, session history, user messages, unrelated extensions, runtime UI, and slash commands are excluded; `before_agent_start` additions are included. Tokens are a fixed character-proxy estimate using `ceil(characters / 4)`, not provider tokenizer billing.
 <!-- token-benchmark:benchmark:end -->
 ## Versions
 

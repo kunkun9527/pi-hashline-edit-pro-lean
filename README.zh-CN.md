@@ -65,7 +65,7 @@ anchor_grep        # 已注册，但默认关闭
 - **启用 anchor_grep Lean：**`read` (87) + `replace` (130) + `insert` (138) + `anchor_grep` (115) + `undo_last_change` (68)
 - **启用 anchor_grep 上游：**`read` (276) + `replace` (625) + `insert` (399) + `anchor_grep` (488) + `undo_last_change` (203)
 
-测量环境为 Pi 0.85.1 的独立临时进程与空白配置。排除内置工具、Skills、上下文文件、消息、无关扩展、运行时 UI 与 Slash Commands；Token 按 `ceil(字符数 / 4)` 估算。
+测量环境为 Pi 0.85.1 的独立临时进程、空白工作目录与空白配置。排除内置工具、Skills、上下文文件、会话历史、用户消息、无关扩展、运行时 UI 与 Slash Commands；计入扩展的 `before_agent_start` 注入。Token 是按 `ceil(字符数 / 4)` 计算的固定字符代理估算，并非模型 tokenizer 实际计费值。
 <!-- token-benchmark:benchmark:end -->
 
 ## 版本
