@@ -4,6 +4,13 @@
   "type": "module",
   "description": "Token-lean wrapper over pi-hashline-edit-pro@4.3.5: full anchor-only runtime, concise model-facing text.",
   "license": "MIT",
+  "files": [
+    "index.ts",
+    "tests",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=22.19.0"
   },
