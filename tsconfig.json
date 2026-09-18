@@ -9,8 +9,8 @@
     "allowImportingTsExtensions": true,
     "baseUrl": ".",
     "paths": {
-      "pi-hashline-edit-pro/src/hashline": ["node_modules/pi-hashline-edit-pro/src/hashline/index.ts"],
-      "pi-hashline-edit-pro/src/*": ["node_modules/pi-hashline-edit-pro/src/*.ts"]
+      "pi-hashline-edit-pro": ["node_modules/pi-hashline-edit-pro/index.ts"],
+      "pi-hashline-edit-pro/*": ["node_modules/pi-hashline-edit-pro/*"]
     }
   },
   "include": ["index.ts"]

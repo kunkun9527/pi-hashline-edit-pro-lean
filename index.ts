@@ -1,33 +1,17 @@
-// pi-hashline-edit-pro-lean: full runtime from pi-hashline-edit-pro,
-// with concise provider-facing tool text and local collapsed-display support.
+// pi-hashline-edit-pro-lean2: full pi-hashline-edit-pro@4.3.5 runtime,
+// with concise provider-facing tool/command text and local collapsed-display support.
+//
+// Design (same idea as pi-hashline-edit-pro-lean): delegate 100% of the
+// runtime to upstream by calling its default export with a proxied `pi`.
+// Only model-visible text differs: short tool descriptions, one-line
+// guidelines, parameter schemas without per-field descriptions, and short
+// command descriptions. Upstream behavior and error semantics stay intact.
+//
+// 4.3.5 contract change vs 3.x: replace/insert resolve the file from anchors
+// alone (anchor-only). Do NOT pass `path` unless /hashline-config opted into
+// requirePath. undo_last_change still requires `path`.
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES } from "@earendil-works/pi-coding-agent";
-import { initHasher, MAX_HASH_LINES } from "pi-hashline-edit-pro/src/hashline";
-import { regReplace } from "pi-hashline-edit-pro/src/replace";
-import { regInsert } from "pi-hashline-edit-pro/src/insert";
-import { regGrep } from "pi-hashline-edit-pro/src/grep";
-import { regUndo, clearUndo } from "pi-hashline-edit-pro/src/replace-undo";
-import { regRead, fmtReadPreview } from "pi-hashline-edit-pro/src/read";
-import type { RMetrics } from "pi-hashline-edit-pro/src/replace-response";
-import { extractWarnings } from "pi-hashline-edit-pro/src/replace-render";
-import {
-  readConfig,
-  toggleAutoRead,
-  toggleAnchorGrep,
-} from "pi-hashline-edit-pro/src/config";
-import { loadHashStore, pruneMissing } from "pi-hashline-edit-pro/src/hash-store";
-import {
-  recordServedSafe,
-  clearServed,
-  buildServedMap,
-} from "pi-hashline-edit-pro/src/served";
-import { clearBoundaryBypass } from "pi-hashline-edit-pro/src/boundary-bypass";
-import { registerWriteHook } from "pi-hashline-edit-pro/src/write-hook";
-import { readNormFile } from "pi-hashline-edit-pro/src/file-reader";
-import { loadFileKindAndText } from "pi-hashline-edit-pro/src/file-kind";
-import { resolveInCwd } from "pi-hashline-edit-pro/src/fs-write";
-import { valAccess } from "pi-hashline-edit-pro/src/validation";
-import { splitLines } from "pi-hashline-edit-pro/src/utils";
+import upstream from "pi-hashline-edit-pro";
 
 const COLLAPSED_DISPLAY_SERVICE = Symbol.for(
   "@local/pi-collapsed-tools.display-service.v1",
@@ -50,19 +34,24 @@ function decorateWithCollapsedDisplay<T extends CollapsedDisplayTool>(tool: T): 
 }
 
 const DESC: Record<string, string> = {
-  read: "Read a file with 4-char HASH anchors; supports paging and images. Verify the path exists first.",
-  replace: "Replace an inclusive range using bare 4-char HASH anchors.",
-  insert: "Insert raw lines around a bare 4-char HASH anchor; provide the path.",
-  undo_last_change: "Undo the most recent replace or insert for a file.",
-  anchor_grep: "Search text with ripgrep and return 4-char anchors for direct editing.",
+  read: "Read a file with 4-char HASH anchors; supports paging and images.",
+  replace: "Replace lines by bare 4-char HASH anchors; anchor-only, no path.",
+  insert: "Insert raw lines around a bare 4-char HASH anchor; anchor-only.",
+  undo_last_change: "Undo the most recent replace or insert for a file; needs path.",
+  anchor_grep: "Search text with ripgrep; hits carry anchors for direct editing.",
 };
 
 const GUIDE: Record<string, string> = {
-  read: "Use exact anchors from read output; verify the path first and re-read after changes.",
-  replace: "Use bare anchors from read output; replacement_lines is raw lines only, one string per item; no HASH prefixes/newlines; [] deletes, [\"\"] is a blank line. Re-read after failure.",
-  insert: "Provide path explicitly; anchor is a bare 4-char hash; lines are raw lines, one string per item, with no HASH prefixes/newlines; the anchor remains. Re-read after failure.",
-  undo_last_change: "Only the latest replace or insert can be undone; write clears history. Undo immediately after a bad diff; re-read if stale.",
-  anchor_grep: "Use returned anchors directly; narrow the search path/glob/context.",
+  read: "Use fresh anchors from read output; re-read after edits. E_AUTO_READ_ALL means the attached copy is still exact.",
+  replace: "Anchors resolve the file; do not pass path unless parameters list it. replacement_lines is raw lines, one string per item, no HASH prefixes or newlines; [] deletes. Same-file calls in one message form one batch; follow +anchor rows in the diff. Re-read after failure.",
+  insert: "Anchor resolves the file; do not pass path unless parameters list it. lines are raw, one string per item; the anchor line stays. Re-read after failure.",
+  undo_last_change: "Needs path. Only the latest replace or insert per file; write clears it. Re-read if stale.",
+  anchor_grep: "Use returned anchors directly in replace or insert; narrow path, glob, or limit.",
+};
+
+const CMD_DESC: Record<string, string> = {
+  "hashline-config": "Open hashline settings: read, path, strict, diff.",
+  "clear-anchors": "Clear session anchor claims; re-read to reclaim.",
 };
 
 const PARAMS = new Set(Object.keys(DESC));
@@ -73,6 +62,11 @@ type AnyTool = {
   promptSnippet?: string;
   promptGuidelines?: string | string[];
   parameters?: Record<string, unknown>;
+  [key: string]: unknown;
+};
+
+type AnyCommand = {
+  description?: string;
   [key: string]: unknown;
 };
 
@@ -110,6 +104,12 @@ function trimTool(tool: AnyTool): AnyTool {
   return out;
 }
 
+function trimCommand(name: string, cmd: AnyCommand): AnyCommand {
+  if (!cmd || typeof cmd !== "object") return cmd;
+  if (!CMD_DESC[name] || typeof cmd.description !== "string") return cmd;
+  return { ...cmd, description: CMD_DESC[name] };
+}
+
 function leanPi(pi: ExtensionAPI): ExtensionAPI {
   return new Proxy(pi, {
     get(target, prop, receiver) {
@@ -118,177 +118,25 @@ function leanPi(pi: ExtensionAPI): ExtensionAPI {
           decorateWithCollapsedDisplay(trimTool(tool)) as never,
         );
       }
+      if (prop === "registerCommand") {
+        const register = Reflect.get(target, prop, receiver) as unknown;
+        if (typeof register !== "function") return register;
+        return (name: string, cmd: AnyCommand) =>
+          (register as (n: string, c: AnyCommand) => unknown).call(
+            target,
+            name,
+            trimCommand(name, cmd),
+          );
+      }
       const value = Reflect.get(target, prop, receiver);
       return typeof value === "function" ? value.bind(target) : value;
     },
   });
 }
 
-// Keep this lifecycle aligned with the pinned upstream index.ts. Only tool text
-// and optional local display decoration differ from upstream behavior.
+// Full upstream lifecycle (session registry, auto-read-all, batch,
+// config overlay, write hook) runs unchanged; only the text the model
+// sees is trimmed by the proxy above.
 export default function (pi: ExtensionAPI): void {
-  const lpi = leanPi(pi);
-
-  regRead(lpi);
-  regReplace(lpi);
-  regInsert(lpi);
-  regGrep(lpi);
-  regUndo(lpi);
-  registerWriteHook(pi);
-
-  let autoRead = true;
-  let grepWasActive = false;
-
-  pi.on("session_start", async (_event, ctx) => {
-    const active = pi.getActiveTools();
-    grepWasActive = active.includes("grep");
-    pi.setActiveTools(active.filter((tool) => tool !== "edit"));
-    await initHasher();
-    loadHashStore()
-      .then((store) =>
-        pruneMissing(store).catch((error) => {
-          console.error("Failed to prune hash store:", error);
-        }),
-      )
-      .catch((error) => {
-        console.error("Failed to load hash store:", error);
-      });
-    const config = await readConfig();
-    autoRead = config.autoRead;
-    pi.setActiveTools(
-      pi.getActiveTools().filter((tool) =>
-        config.anchorGrepEnabled ? tool !== "grep" : tool !== "anchor_grep",
-      ),
-    );
-    const debugValue = process.env.PI_HASHLINE_DEBUG;
-    if (debugValue === "1" || debugValue === "true") {
-      ctx.ui.notify("Hashline Edit mode active", "info");
-    }
-  });
-
-  pi.registerCommand("toggle-auto-read", {
-    description: "Toggle auto-read anchors after write and post-edit diffs after replace, insert, and undo_last_change",
-    handler: async (_args, ctx) => {
-      autoRead = await toggleAutoRead();
-      const state = autoRead ? "enabled" : "disabled";
-      ctx.ui.notify(`Auto-read anchors after write and post-edit diffs after replace/undo: ${state}`, "info");
-    },
-  });
-
-  pi.registerCommand("toggle-anchor-grep", {
-    description: "Enable or disable anchor_grep (built-in grep is disabled while it is on)",
-    handler: async (_args, ctx) => {
-      const enabled = await toggleAnchorGrep();
-      const active = pi.getActiveTools();
-      pi.setActiveTools(
-        enabled
-          ? [...new Set([...active.filter((tool) => tool !== "grep"), "anchor_grep"])]
-          : [...new Set([
-              ...active.filter((tool) => tool !== "anchor_grep"),
-              ...(grepWasActive ? ["grep"] : []),
-            ])],
-      );
-      ctx.ui.notify(`anchor_grep tool ${enabled ? "enabled" : "disabled"}`, "info");
-    },
-  });
-
-  pi.on("tool_result", async (event, ctx) => {
-    if (event.isError) return;
-
-    if (event.toolName === "write") {
-      const writtenPath = (event.input as Record<string, unknown>)?.path;
-      let resolvedPath: string | undefined;
-      if (typeof writtenPath === "string") {
-        try {
-          resolvedPath = (await resolveInCwd(writtenPath, ctx.cwd)).resolved;
-          await clearUndo(resolvedPath);
-          clearBoundaryBypass(resolvedPath);
-          const store = await loadHashStore();
-          clearServed(store, resolvedPath);
-        } catch (error) {
-          console.error("Failed to clear undo after write:", error);
-        }
-      }
-      if (!autoRead) return;
-      if (typeof writtenPath !== "string") return;
-      try {
-        resolvedPath ??= (await resolveInCwd(writtenPath, ctx.cwd)).resolved;
-        await valAccess(resolvedPath, writtenPath);
-        const file = await loadFileKindAndText(resolvedPath, {
-          maxLines: MAX_HASH_LINES,
-          displayPath: writtenPath,
-        });
-        if (file.kind !== "text") return;
-        const { normalized, fileHashes, absolutePath } = await readNormFile(
-          writtenPath,
-          ctx.cwd,
-          { maxLines: MAX_HASH_LINES, preloadedFile: file },
-        );
-        const preview = await fmtReadPreview(
-          normalized,
-          {},
-          fileHashes,
-          absolutePath,
-          DEFAULT_MAX_BYTES,
-          DEFAULT_MAX_LINES,
-        );
-        const fileLines = splitLines(normalized);
-        const servedMap = buildServedMap(fileHashes, fileLines, preview.servedHashes);
-        await recordServedSafe(
-          absolutePath,
-          servedMap,
-          "auto-read",
-          new Set(fileHashes),
-        );
-        return {
-          content: [
-            ...(event.content ?? []),
-            {
-              type: "text",
-              text: `\n\n--- Auto-read (hashline anchors) ---\n${preview.text}`,
-            },
-          ],
-        };
-      } catch (error) {
-        console.error("Auto-read after write failed:", error);
-        const message = error instanceof Error ? error.message : String(error);
-        return {
-          content: [
-            ...(event.content ?? []),
-            { type: "text", text: `\n\n--- Auto-read failed: ${message} ---` },
-          ],
-        };
-      }
-    }
-
-    if (
-      event.toolName !== "replace" &&
-      event.toolName !== "insert" &&
-      event.toolName !== "undo_last_change"
-    ) return;
-    if (!autoRead) return;
-
-    const metrics = (event.details as { metrics?: RMetrics } | undefined)?.metrics;
-    if (metrics?.classification === "noop") return;
-
-    const diff = (event.details as { diff?: string } | undefined)?.diff;
-    if (typeof diff !== "string") return;
-    const hasDiff = diff.length > 0;
-
-    const rendered = (event.content ?? [])
-      .filter(
-        (entry): entry is { type: "text"; text: string } =>
-          entry.type === "text" && typeof entry.text === "string",
-      )
-      .map((entry) => entry.text)
-      .join("\n");
-    const warnings = extractWarnings(rendered);
-    const emptyHint = "[post-edit] applied successfully; the diff is empty (whitespace-only change).";
-    const hint = hasDiff
-      ? (warnings ? `${diff}\n\n${warnings}` : diff)
-      : (warnings ? `${emptyHint}\n\n${warnings}` : emptyHint);
-    return {
-      content: [{ type: "text", text: hint }],
-    };
-  });
+  upstream(leanPi(pi));
 }

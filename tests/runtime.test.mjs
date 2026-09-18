@@ -5,8 +5,8 @@ import { join } from "node:path";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const home = await mkdtemp(join(tmpdir(), "pi-hashline-lean-home-"));
-const cwd = await mkdtemp(join(tmpdir(), "pi-hashline-lean-cwd-"));
+const home = await mkdtemp(join(tmpdir(), "pi-hashline-lean2-home-"));
+const cwd = await mkdtemp(join(tmpdir(), "pi-hashline-lean2-cwd-"));
 process.env.HOME = home;
 
 const jiti = createJiti(import.meta.url, { interopDefault: true });
@@ -26,16 +26,19 @@ function anchorsFrom(result) {
   );
 }
 
-test("preserves upstream read, replace, insert, undo, and write-hook behavior", async () => {
+test("preserves upstream 4.3.5 read, replace, insert, undo, and write-hook behavior", async () => {
   const file = join(cwd, "sample.txt");
   await writeFile(file, "alpha\nbeta\n");
 
   const tools = [];
   const handlers = {};
-  let activeTools = ["read", "write", "grep", "edit"];
+  // Mirror a real session: all registered tools start active, including anchor_grep.
+  let activeTools = ["read", "write", "grep", "edit", "read", "replace", "insert", "anchor_grep", "undo_last_change"];
   const pi = {
     registerTool(tool) {
-      tools.push(tool);
+      const index = tools.findIndex((entry) => entry.name === tool.name);
+      if (index >= 0) tools[index] = tool;
+      else tools.push(tool);
     },
     registerCommand() {},
     on(name, handler) {
@@ -57,7 +60,9 @@ test("preserves upstream read, replace, insert, undo, and write-hook behavior", 
   const ctx = { cwd, signal, ui: { notify() {} } };
   await handlers.session_start[0]({}, ctx);
   assert.equal(activeTools.includes("edit"), false);
-  assert.equal(activeTools.includes("anchor_grep"), false);
+  // 4.3.5 default config enables anchor_grep and disables built-in grep.
+  assert.equal(activeTools.includes("anchor_grep"), true);
+  assert.equal(activeTools.includes("grep"), false);
 
   const byName = Object.fromEntries(tools.map((tool) => [tool.name, tool]));
   const firstRead = await byName.read.execute(
@@ -71,10 +76,10 @@ test("preserves upstream read, replace, insert, undo, and write-hook behavior", 
   assert.equal(firstAnchors.get("alpha")?.length, 4);
   assert.equal(firstAnchors.get("beta")?.length, 4);
 
+  // 4.3.5 is anchor-only: no path for replace/insert.
   await byName.replace.execute(
     "replace-1",
     {
-      path: "sample.txt",
       remove_from: firstAnchors.get("beta"),
       remove_to: firstAnchors.get("beta"),
       replacement_lines: ["BETA"],
@@ -96,7 +101,6 @@ test("preserves upstream read, replace, insert, undo, and write-hook behavior", 
   await byName.insert.execute(
     "insert-1",
     {
-      path: "sample.txt",
       anchor: secondAnchors.get("alpha"),
       direction: "after",
       lines: ["between"],

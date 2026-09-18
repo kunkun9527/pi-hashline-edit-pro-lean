@@ -5,7 +5,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-process.env.HOME = mkdtempSync(join(tmpdir(), "pi-hashline-lean-test-"));
+process.env.HOME = mkdtempSync(join(tmpdir(), "pi-hashline-lean2-test-"));
 
 const jiti = createJiti(import.meta.url, { interopDefault: true });
 const hashlineExtension = (await jiti.import("../index.ts")).default;
@@ -20,12 +20,14 @@ const expectedTools = [
   "undo_last_change",
 ];
 
-function createPi(registered) {
+function createPi(registered, commands) {
   return {
     registerTool(tool) {
       registered.push(tool);
     },
-    registerCommand() {},
+    registerCommand(name, cmd) {
+      commands.push([name, cmd]);
+    },
     on() {},
     getActiveTools() {
       return ["read", "bash", "write", "grep", ...expectedTools];
@@ -47,9 +49,10 @@ function assertNoDescriptions(value) {
   for (const child of Object.values(value)) assertNoDescriptions(child);
 }
 
-test("registers the upstream 3.0.4 tools with lean model-facing text", () => {
+test("registers the upstream 4.3.5 tools with lean model-facing text", () => {
   const registered = [];
-  const pi = createPi(registered);
+  const commands = [];
+  const pi = createPi(registered, commands);
   const originalRegisterTool = pi.registerTool;
 
   hashlineExtension(pi);
@@ -70,17 +73,41 @@ test("registers the upstream 3.0.4 tools with lean model-facing text", () => {
     ));
   }
 
+  // 4.3.5 contract: replace/insert are anchor-only by default (no path).
   const replace = registered.find((tool) => tool.name === "replace");
   assert.deepEqual(Object.keys(replace.parameters.properties), [
-    "path",
     "remove_from",
     "remove_to",
     "replacement_lines",
   ]);
+  const insert = registered.find((tool) => tool.name === "insert");
+  assert.deepEqual(Object.keys(insert.parameters.properties), [
+    "anchor",
+    "direction",
+    "lines",
+  ]);
+  const undo = registered.find((tool) => tool.name === "undo_last_change");
+  assert.deepEqual(Object.keys(undo.parameters.properties), ["path"]);
+});
+
+test("trims upstream command descriptions without dropping commands", () => {
+  const registered = [];
+  const commands = [];
+  hashlineExtension(createPi(registered, commands));
+
+  const byName = Object.fromEntries(commands);
+  assert.ok("hashline-config" in byName);
+  assert.ok("clear-anchors" in byName);
+  for (const [, cmd] of commands) {
+    assert.equal(typeof cmd.description, "string");
+    assert.ok(cmd.description.length < 60);
+    assert.equal(typeof cmd.handler, "function");
+  }
 });
 
 test("uses the optional local collapsed-display service without installing one", () => {
   const registered = [];
+  const commands = [];
   const decorated = [];
   globalThis[collapsedDisplayService] = {
     version: 1,
@@ -91,7 +118,7 @@ test("uses the optional local collapsed-display service without installing one",
   };
 
   try {
-    hashlineExtension(createPi(registered));
+    hashlineExtension(createPi(registered, commands));
   } finally {
     delete globalThis[collapsedDisplayService];
   }
