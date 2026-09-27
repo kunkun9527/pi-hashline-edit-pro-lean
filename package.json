@@ -1,8 +1,8 @@
 {
   "name": "pi-hashline-edit-pro-lean",
-  "version": "4.3.5-lean.1",
+  "version": "4.4.3-lean.1",
   "type": "module",
-  "description": "Token-lean wrapper over pi-hashline-edit-pro@4.3.5: full anchor-only runtime, concise model-facing text.",
+  "description": "Token-lean wrapper over pi-hashline-edit-pro@4.4.3: full anchor-only runtime, concise model-facing text.",
   "license": "MIT",
   "files": [
     "index.ts",
@@ -20,7 +20,7 @@
     "check": "npm run typecheck && npm test"
   },
   "dependencies": {
-    "pi-hashline-edit-pro": "4.3.5"
+    "pi-hashline-edit-pro": "4.4.3"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": ">=0.84.0",

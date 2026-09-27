@@ -49,7 +49,7 @@ function assertNoDescriptions(value) {
   for (const child of Object.values(value)) assertNoDescriptions(child);
 }
 
-test("registers the upstream 4.3.5 tools with lean model-facing text", () => {
+test("registers the upstream 4.4.3 tools with lean model-facing text", () => {
   const registered = [];
   const commands = [];
   const pi = createPi(registered, commands);
@@ -73,7 +73,7 @@ test("registers the upstream 4.3.5 tools with lean model-facing text", () => {
     ));
   }
 
-  // 4.3.5 contract: replace/insert are anchor-only by default (no path).
+  // 4.4.3 contract: replace/insert are anchor-only by default (no path).
   const replace = registered.find((tool) => tool.name === "replace");
   assert.deepEqual(Object.keys(replace.parameters.properties), [
     "remove_from",

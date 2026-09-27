@@ -1,4 +1,4 @@
-// pi-hashline-edit-pro-lean2: full pi-hashline-edit-pro@4.3.5 runtime,
+// pi-hashline-edit-pro-lean2: full pi-hashline-edit-pro@4.4.3 runtime,
 // with concise provider-facing tool/command text and local collapsed-display support.
 //
 // Design (same idea as pi-hashline-edit-pro-lean): delegate 100% of the
@@ -7,7 +7,7 @@
 // guidelines, parameter schemas without per-field descriptions, and short
 // command descriptions. Upstream behavior and error semantics stay intact.
 //
-// 4.3.5 contract change vs 3.x: replace/insert resolve the file from anchors
+// 4.x contract change vs 3.x: replace/insert resolve the file from anchors
 // alone (anchor-only). Do NOT pass `path` unless /hashline-config opted into
 // requirePath. undo_last_change still requires `path`.
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";

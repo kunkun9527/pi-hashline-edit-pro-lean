@@ -2,7 +2,7 @@
 
 [简体中文](README.zh-CN.md)
 
-A token-lean Pi wrapper around [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro). It pins the complete upstream `4.3.5` runtime while shortening persistent provider-facing tool text.
+A token-lean Pi wrapper around [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro). It pins the complete upstream `4.4.3` runtime while shortening persistent provider-facing tool text.
 
 ## What it keeps
 
@@ -39,9 +39,16 @@ Use `/hashline-config` to change settings (auto-read, require-path mode, strict 
 
 Always copy the four-character anchors returned by `read` or `anchor_grep`. Never invent anchors. `replace` takes `replacement_lines: string[]`; `[]` deletes the selected range and `[""]` creates one blank line. Same-file `replace`/`insert` calls in one message form one batch with a combined diff and a single undo.
 
-## Breaking changes from the previous lean release
+## Behavior changes in upstream 4.4
 
-This release follows upstream `4.3.5`, whose editing contract is intentionally incompatible with `3.0.4`:
+- Boundary-line dedup is gone: `replacement_lines` are written exactly as given. If you repeat the line just outside the range, it will appear twice.
+- In a same-file batch, a call whose anchors resolve nowhere now fails on its own; the rest of the batch is still written.
+- New error codes tell you what to do next: `E_RANGE_STALE` returns fresh anchors to retry with, `E_BATCH_OVERLAP` means two calls share lines, `E_OP_ABORTED` means another call in the batch failed or the file changed.
+- The dedup option is removed from `/hashline-config`.
+
+## Breaking changes since 3.x
+
+The 4.x editing contract is intentionally incompatible with `3.0.4`:
 
 - `replace` and `insert` are anchor-only: no `path` by default (opt back in with require-path mode).
 - Same-file calls in one message form one batch per file, with one undo for the whole batch.
@@ -53,24 +60,24 @@ Start a fresh Pi session after upgrading so the model receives the new schemas a
 ## Context footprint
 
 <!-- token-benchmark:benchmark:start -->
-Measured against upstream `pi-hashline-edit-pro@4.3.5`:
+Measured against upstream `pi-hashline-edit-pro@4.4.3`:
 
 | Configuration | Lean | Upstream | Saved |
 | --- | ---: | ---: | ---: |
-| Default | **537** | 1,934 | **1,397 (72.2%)** |
-| With anchor_grep | **537** | 1,934 | **1,397 (72.2%)** |
+| Default | **537** | 2,040 | **1,503 (73.7%)** |
+| With anchor_grep | **537** | 2,040 | **1,503 (73.7%)** |
 
 - **Default Lean:** `read` (86) + `replace` (147) + `insert` (125) + `anchor_grep` (116) + `undo_last_change` (63)
-- **Default upstream:** `read` (272) + `replace` (629) + `insert` (388) + `anchor_grep` (424) + `undo_last_change` (221)
+- **Default upstream:** `read` (276) + `replace` (740) + `insert` (379) + `anchor_grep` (424) + `undo_last_change` (221)
 - **With anchor_grep Lean:** `read` (86) + `replace` (147) + `insert` (125) + `anchor_grep` (116) + `undo_last_change` (63)
-- **With anchor_grep upstream:** `read` (272) + `replace` (629) + `insert` (388) + `anchor_grep` (424) + `undo_last_change` (221)
+- **With anchor_grep upstream:** `read` (276) + `replace` (740) + `insert` (379) + `anchor_grep` (424) + `undo_last_change` (221)
 
-Measured with Pi 0.85.1 in separate temporary processes with empty working directories and configuration. Built-in tools, skills, context files, session history, user messages, unrelated extensions, runtime UI, and slash commands are excluded; `before_agent_start` additions are included. Tokens are a fixed character-proxy estimate using `ceil(characters / 4)`, not provider tokenizer billing.
+Measured with Pi 0.87.1 in separate temporary processes with empty working directories and configuration. Built-in tools, skills, context files, session history, user messages, unrelated extensions, runtime UI, and slash commands are excluded; `before_agent_start` additions are included. Tokens are a fixed character-proxy estimate using `ceil(characters / 4)`, not provider tokenizer billing.
 <!-- token-benchmark:benchmark:end -->
 ## Versions
 
-- Lean wrapper: `4.3.5-lean.1`
-- Upstream runtime: `pi-hashline-edit-pro@4.3.5`
+- Lean wrapper: `4.4.3-lean.1`
+- Upstream runtime: `pi-hashline-edit-pro@4.4.3`
 - Node.js: `>=22.19.0`
 
 ## Development
