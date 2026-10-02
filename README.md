@@ -64,15 +64,15 @@ Measured against upstream `pi-hashline-edit-pro@4.4.3`:
 
 | Configuration | Lean | Upstream | Saved |
 | --- | ---: | ---: | ---: |
-| Default | **537** | 2,040 | **1,503 (73.7%)** |
-| With anchor_grep | **537** | 2,040 | **1,503 (73.7%)** |
+| Default | **552** | 2,040 | **1,488 (72.9%)** |
+| With anchor_grep | **552** | 2,040 | **1,488 (72.9%)** |
 
-- **Default Lean:** `read` (86) + `replace` (147) + `insert` (125) + `anchor_grep` (116) + `undo_last_change` (63)
+- **Default Lean:** `read` (88) + `replace` (150) + `insert` (127) + `anchor_grep` (119) + `undo_last_change` (68)
 - **Default upstream:** `read` (276) + `replace` (740) + `insert` (379) + `anchor_grep` (424) + `undo_last_change` (221)
-- **With anchor_grep Lean:** `read` (86) + `replace` (147) + `insert` (125) + `anchor_grep` (116) + `undo_last_change` (63)
+- **With anchor_grep Lean:** `read` (88) + `replace` (150) + `insert` (127) + `anchor_grep` (119) + `undo_last_change` (68)
 - **With anchor_grep upstream:** `read` (276) + `replace` (740) + `insert` (379) + `anchor_grep` (424) + `undo_last_change` (221)
 
-Measured with Pi 0.87.1 in separate temporary processes with empty working directories and configuration. Built-in tools, skills, context files, session history, user messages, unrelated extensions, runtime UI, and slash commands are excluded; `before_agent_start` additions are included. Tokens are a fixed character-proxy estimate using `ceil(characters / 4)`, not provider tokenizer billing.
+Measured with Pi 1.0.0 in separate temporary processes with empty working directories and configuration. Built-in tools, skills, context files, session history, user messages, unrelated extensions, runtime UI, and slash commands are excluded; `before_agent_start` additions are included. Tokens are a fixed character-proxy estimate using `ceil(characters / 4)`, not provider tokenizer billing.
 <!-- token-benchmark:benchmark:end -->
 ## Versions
 

@@ -97,7 +97,7 @@ function trimTool(tool: AnyTool): AnyTool {
   const name = out.name ?? "";
   if (DESC[name]) out.description = DESC[name];
   delete out.promptSnippet;
-  if (GUIDE[name]) out.promptGuidelines = toGuidelineLines(GUIDE[name]);
+  if (GUIDE[name]) out.promptGuidelines = toGuidelineLines(GUIDE[name]).map((line) => `${name}: ${line}`);
   if (out.parameters && PARAMS.has(name)) {
     out.parameters = stripDescriptions(out.parameters) as Record<string, unknown>;
   }
