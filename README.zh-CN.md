@@ -77,7 +77,7 @@ anchor_grep        # 默认启用
 
 ## 版本
 
-- Lean 包装层：`4.4.3-lean.1`
+- Lean 包装层：`4.4.3-lean.2`
 - 上游运行时：`pi-hashline-edit-pro@4.4.3`
 - Node.js：`>=22.19.0`
 

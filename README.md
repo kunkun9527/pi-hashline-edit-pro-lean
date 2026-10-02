@@ -76,7 +76,7 @@ Measured with Pi 1.0.0 in separate temporary processes with empty working direct
 <!-- token-benchmark:benchmark:end -->
 ## Versions
 
-- Lean wrapper: `4.4.3-lean.1`
+- Lean wrapper: `4.4.3-lean.2`
 - Upstream runtime: `pi-hashline-edit-pro@4.4.3`
 - Node.js: `>=22.19.0`
 
