@@ -2,7 +2,7 @@
   "name": "pi-hashline-edit-pro-lean",
   "version": "6.4.6-lean.3",
   "type": "module",
-  "description": "Token-lean wrapper over pi-hashline-edit-pro@6.4.6: full anchor-only runtime, upstream's model-facing text condensed.",
+  "description": "Lean Pi version of pi-hashline-edit-pro: the same anchor-based editing and safety checks, with a much shorter tool prompt.",
   "license": "MIT",
   "files": [
     "index.ts",

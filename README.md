@@ -1,40 +1,18 @@
+<div align="center">
+
 # pi-hashline-edit-pro-lean
 
+**Anchor-based file editing for Pi, just as safe, with a much shorter tool prompt.**
+
+[简体中文](https://github.com/kunkun9527/pi-hashline-edit-pro-lean/blob/main/README_zh-CN.md) · Full setup: [My Lean Pi Setup](https://github.com/kunkun9527/my-lean-pi-setup)
+
+</div>
+
 <!-- token-benchmark:summary:start -->
-> **Token benchmark: Lean 1,282, upstream `pi-hashline-edit-pro@6.4.6` 4,732 — 72.9% fewer.**
+> **Always-on context: 1,282 tokens vs. 4,732 for upstream `pi-hashline-edit-pro@6.4.6`, 72.9% less.**
 <!-- token-benchmark:summary:end -->
-> [See my full setup for Pi](https://github.com/kunkun9527/my-lean-pi-setup)
 
-[简体中文](https://github.com/kunkun9527/pi-hashline-edit-pro-lean/blob/main/README_zh-CN.md)
-
-A token-lean Pi wrapper around [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro). It pins the complete upstream `6.4.6` runtime while shortening persistent provider-facing tool text.
-
-## Context footprint
-
-<!-- token-benchmark:benchmark:start -->
-With only this extension enabled, its recurring model-facing initialization contribution is:
-
-| Variant | Tool and prompt contribution | Total |
-| --- | --- | ---: |
-| Lean `pi-hashline-edit-pro-lean@6.4.6-lean.3` | `read` (147) + `grep` (146) + `replace` (254) + `replace_match` (195) + `insert` (131) + `copy` (216) + `move` (99) + `undo_last_change` (94) | **1,282** |
-| Upstream `pi-hashline-edit-pro@6.4.6` | `read` (388) + `grep` (514) + `replace` (644) + `replace_match` (953) + `insert` (524) + `copy` (731) + `move` (707) + `undo_last_change` (271) | **4,732** |
-
-This saves **3,450 tokens (72.9%)**.
-Measured with Pi 1.2.0 in separate temporary processes with empty working directories and configuration. Built-in tools, skills, context files, session history, user messages, unrelated extensions, runtime UI, and slash commands are excluded; `before_agent_start` additions are included. Tokens are a fixed character-proxy estimate using `ceil(characters / 4)`, not provider tokenizer billing.
-<!-- token-benchmark:benchmark:end -->
-
-## What it keeps
-
-- Four-character Hashline anchors and served-anchor validation.
-- Safe anchor-only `replace`, `replace_match`, `insert`, `copy`, and `move` operations (no `path` by default), plus per-file undo.
-- Anchored ripgrep results under the `grep` name, enabled by default.
-- Hash store, automatic reads, file checks, write-echo protection, and upstream session hooks.
-- The upstream runtime, schemas, and tool availability settings rather than a reduced reimplementation.
-- Optional compatibility with the local `@local/pi-collapsed-tools.display-service.v1` decorator.
-
-## Why it is lean
-
-Only model-facing prose is trimmed, and every line is upstream's own wording condensed: concise descriptions, one-line tool-list snippets, and short versions of upstream's usage rules; each rule is said once, so parameter descriptions are removed except upstream's text for range bounds, copy's source and destination (move takes the same fields), and `text` (its newline note moves to the shared edit rule); no prompt resources and no rules of our own are added. Rules that upstream already enforces with an error naming the fix (unread range lines, overlapping batch ranges, stale anchors, path ownership) are left to that error instead of the prompt. The prompt keeps upstream's rules whose violation would silently produce a wrong edit or lose something an error cannot give back: the `anchor│content` row format, escape decoding, batch and single-slot undo, append and deletion semantics. Lines upstream shows only under some settings (replace_match or copy/move off, autoRead off, codemode on) follow those settings; upstream's tool-preference line, which it repeats on every tool, is kept once on `read`, and codemode-only guidelines pass through unchanged. Runtime behavior, defaults, validation, error contracts, and tool schemas are upstream's.
+A lean version of [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro). It runs the upstream `6.4.6` runtime as-is; I only condensed the tool prompt the model reads on every turn.
 
 ## Install
 
@@ -42,29 +20,51 @@ Only model-facing prose is trimmed, and every line is upstream's own wording con
 pi install git:github.com/kunkun9527/pi-hashline-edit-pro-lean
 ```
 
-Requires Pi `>=0.99.0`. Do not load another Hashline wrapper or the upstream package at the same time, or tools may be registered twice.
+Requires Pi `>=0.99.0` and Node.js `>=22.19.0`. Don't install it alongside upstream or another Hashline wrapper, or the tools get registered twice.
 
-## Tools
+## Compared with upstream
+
+**Kept**:
+
+- Four-character Hashline anchors and validation of served anchors.
+- Anchor-only `replace`, `replace_match`, `insert`, `copy` and `move` (no `path` by default), plus per-file undo.
+- Anchored ripgrep search under the name `grep`, on by default.
+- Hash store, automatic reads, file checks, write-echo protection and upstream's session hooks.
+- Upstream's runtime, schemas and tool switches, with no safety mechanism cut or rewritten.
+
+**Trimmed**: only text the model sees, every line a condensed version of upstream's own wording, with no rules of my own.
+
+- Each rule is said once. Most parameter descriptions are gone; upstream's text stays only for range bounds, copy's source and destination (move takes the same fields), and `text`.
+- Rules upstream already enforces with an error that names the fix (unread lines in a range, overlapping ranges in a batch, stale anchors, path not matching the anchor) are left to that error.
+- Rules whose violation would silently produce a wrong edit, or lose something no error can give back, are kept: the `anchor│content` row format, decoding escapes once, batch and single-slot undo, append and deletion semantics.
+- Lines upstream shows only under some settings still follow those settings; the "which tool to prefer" line upstream repeats on every tool is kept once, on `read`.
+
+**Added**:
+
+- **Forgiving arguments**: before validation, `replace` accepts the retired `replacement_text` / `replacement_lines` as `text`, `insert` accepts `lines` as `text`, and a `ref` equal to `path` is dropped. Anything ambiguous (such as a missing `remove_to`, `path` or anchor) still fails validation.
+- **Collapsed display**: works with the local `@local/pi-collapsed-tools.display-service.v1` decorator.
+
+## Usage
 
 ```text
 read
-replace            # anchor-only: no path by default
+replace            # anchor-only, no path by default
 replace_match      # exact substring inside an anchored range
-insert             # anchor-only: no path by default
+insert             # anchor-only, no path by default
 copy / move        # anchored line ranges, same or another file
 grep               # anchored ripgrep; replaces Pi's built-in grep
 undo_last_change   # still requires path
 ```
 
-Always copy the four-character anchors returned by `read` or `grep`. Never invent anchors. `replace` and `insert` take one exact `text` string; line breaks inside it separate lines, and `text: ""` deletes the selected range in `replace`. Same-file edits in one message form one batch with a combined diff and a single undo.
-
-Forgiving arguments: before validation, `replace` accepts the retired `replacement_text` / `replacement_lines` and `insert` accepts `lines` as `text`, and a `ref` equal to `path` is dropped. Anything ambiguous (including a missing `remove_to`, `path` or anchor) still fails validation.
+- Always copy anchors from `read` or `grep` results; never make them up.
+- `replace` and `insert` take one exact `text` string; line breaks inside it separate lines, and `text: ""` in `replace` deletes the selected range.
+- Same-file edits in one message form one batch, with a combined diff and a single undo.
 
 ## Configuration
 
-Settings live in `~/.config/pi-hashline-edit-pro/config.json` (or `$PI_HASHLINE_DIR/config.json`) and are shared with upstream. Use `/hashline-config` to change them.
+Settings live in `~/.config/pi-hashline-edit-pro/config.json` (or `$PI_HASHLINE_DIR/config.json`), shared with upstream. Change them with `/hashline-config`.
 
-Defaults are upstream's: all eight tools are on. Versions up to `6.4.5-lean.2` wrote `replaceMatchEnabled: false` (and older ones `copyMoveEnabled: false`) into the config on load; those values stay after upgrading, so turn the tools back on in `/hashline-config`, or set:
+Defaults are upstream's: all eight tools on. Versions up to `6.4.5-lean.2` wrote `replaceMatchEnabled: false` into the config on load (older ones also `copyMoveEnabled: false`), and those values survive an upgrade. Turn the tools back on in `/hashline-config`, or set:
 
 ```json
 {
@@ -77,19 +77,27 @@ Two upstream settings swap in Pi's plain tools: `anchorGrepEnabled: false` regis
 
 ## Upgrading from 4.x
 
-- `replacement_lines` / `lines` arrays are replaced by the `text` string; `[]` becomes `""`.
+- `replacement_lines` / `lines` arrays became the `text` string; `[]` becomes `""`.
 - `anchor_grep` is now `grep` and replaces Pi's built-in `grep`.
-- New `replace_match`, `copy`, and `move` tools, on by default and switchable in `/hashline-config`.
-- A pure deletion verifies its boundary lines; interior lines that were never served are removed as they currently stand.
+- New `replace_match`, `copy` and `move` tools, on by default and switchable in `/hashline-config`.
+- A pure deletion verifies its boundary lines; interior lines that were never served are removed as they currently stand on disk.
 
-Start a fresh Pi session after upgrading so the model receives the new schemas and instructions.
+Start a fresh Pi session after upgrading so the model gets the new schemas and instructions.
 
-## Versions
+## Token comparison
 
-- Lean wrapper: `6.4.6-lean.3`
-- Upstream runtime: `pi-hashline-edit-pro@6.4.6`
-- Pi: `>=0.99.0`
-- Node.js: `>=22.19.0`
+<!-- token-benchmark:benchmark:start -->
+With only this extension enabled, what the model reads on every turn:
+
+| Variant | Breakdown | Total |
+| --- | --- | ---: |
+| Lean `pi-hashline-edit-pro-lean@6.4.6-lean.3` | `read` (147) + `grep` (146) + `replace` (254) + `replace_match` (195) + `insert` (131) + `copy` (216) + `move` (99) + `undo_last_change` (94) | **1,282** |
+| Upstream `pi-hashline-edit-pro@6.4.6` | `read` (388) + `grep` (514) + `replace` (644) + `replace_match` (953) + `insert` (524) + `copy` (731) + `move` (707) + `undo_last_change` (271) | **4,732** |
+
+That is **3,450 tokens (72.9%)** less.
+
+<sub>Method: Pi 1.2.0, each variant measured in its own temporary process with an empty working directory and configuration. Built-in tools, skills, context files, session history, user messages, other extensions, runtime UI and slash commands are not counted; `before_agent_start` additions are. Tokens are estimated as `ceil(characters / 4)`, not billed tokens.</sub>
+<!-- token-benchmark:benchmark:end -->
 
 ## Development
 
@@ -98,6 +106,6 @@ npm ci
 npm run check
 ```
 
-## License and upstream
+## License
 
-MIT. This project wraps the MIT-licensed [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro).
+MIT. The runtime comes from [`pi-hashline-edit-pro`](https://github.com/YuGiMob/pi-hashline-edit-pro) by [@YuGiMob](https://github.com/YuGiMob) (MIT).
